@@ -1,0 +1,12 @@
+@import "tailwindcss";
+
+/* Base/Custom layer extensions can go here if needed */
+:root {
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: #f9fafb;
+  color: #111827;
+}

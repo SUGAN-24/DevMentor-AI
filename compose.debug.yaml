@@ -1,0 +1,6 @@
+services:
+  devmentorai:
+    image: devmentorai
+    build:
+      context: .
+      dockerfile: ./Dockerfile
