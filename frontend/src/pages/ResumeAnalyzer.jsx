@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import api from '../services/api';
 
 export default function ResumeAnalyzer() {
   const [file, setFile] = useState(null);
@@ -36,21 +37,8 @@ export default function ResumeAnalyzer() {
     try {
       const base64Data = await getBase64(file);
 
-      const response = await fetch('http://localhost:5000/api/ai/analyze-resume', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ pdfBase64: base64Data })
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || 'Failed to analyze resume.');
-      }
-
-      setAnalysis(result.data);
+      const response = await api.post('/ai/analyze-resume', { pdfBase64: base64Data });
+      setAnalysis(response.data.data);
     } catch (err) {
       console.error(err);
       setError(err.message || 'An error occurred during resume analysis. Please verify your backend server and Gemini API keys.');

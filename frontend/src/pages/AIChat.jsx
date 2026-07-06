@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import api from '../services/api';
 
 // A simple utility to render markdown code blocks to basic HTML for our chat
 const parseMessage = (text) => {
@@ -52,23 +53,12 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      // In development, the proxy is usually configured, or we assume backend on port 5000
-      const response = await fetch('http://localhost:5000/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          prompt: userMessage,
-          history: messages 
-        })
+      const response = await api.post('/ai/chat', { 
+        prompt: userMessage,
+        history: messages 
       });
 
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to fetch AI response');
-      }
-
-      setMessages(prev => [...prev, { role: 'model', text: data.data.text }]);
+      setMessages(prev => [...prev, { role: 'model', text: response.data.data.text }]);
     } catch (err) {
       console.error(err);
       setError(err.message || 'An error occurred while connecting to DevMentor AI.');
