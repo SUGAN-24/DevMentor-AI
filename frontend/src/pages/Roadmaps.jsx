@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const TOPICS = [
   'Java', 'Python', 'React', 'Node.js', 
@@ -145,15 +146,23 @@ export default function Roadmaps() {
                 </p>
                 
                 <div className="mt-6 pt-6 border-t border-slate-800 flex items-center gap-4">
-                  <button className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1">
+                  <Link 
+                    to="/roadmaps/resources" 
+                    state={{ topic: selectedTopic, phaseTitle: node.title, phaseDescription: node.description }}
+                    className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+                  >
                     View Resources
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
-                  </button>
-                  <button className="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1">
+                  </Link>
+                  <Link 
+                    to="/roadmaps/quiz" 
+                    state={{ topic: selectedTopic, phaseTitle: node.title, phaseDescription: node.description }}
+                    className="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+                  >
                     Take Quiz
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>

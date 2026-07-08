@@ -16,6 +16,13 @@ export const errorHandler = (err, req, res, next) => {
     response.stack = err.stack;
   }
 
+  // Handle Mongo duplicate key error (e.g. unique email)
+  if (err.code && err.code === 11000) {
+    const fields = Object.keys(err.keyValue || {}).join(', ');
+    response.message = `${fields} already exists`;
+    return res.status(400).json(response);
+  }
+
   // Handle Mongoose Validation Error
   if (err.name === 'ValidationError') {
     response.message = Object.values(err.errors).map(val => val.message).join(', ');

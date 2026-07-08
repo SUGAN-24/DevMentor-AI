@@ -10,12 +10,14 @@ export const registerUser = async (req, res, next) => {
   try {
     const { name, email, password } = req.body;
 
-    if (!name || !email || !password) {
+    const normalizedEmail = email?.toLowerCase().trim();
+
+    if (!name || !normalizedEmail || !password) {
       res.status(400);
       throw new Error('Please provide name, email and password');
     }
 
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email: normalizedEmail });
 
     if (userExists) {
       res.status(400);
@@ -24,7 +26,7 @@ export const registerUser = async (req, res, next) => {
 
     const user = await User.create({
       name,
-      email,
+      email: normalizedEmail,
       password,
     });
 
@@ -54,12 +56,22 @@ export const registerUser = async (req, res, next) => {
 export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
+    const normalizedEmail = email?.toLowerCase().trim();
+    const demoEmail = process.env.DEMO_EMAIL || 'demo@devmentor.ai';
+    const demoPassword = process.env.DEMO_PASSWORD || 'demo12345';
 
-    // Check for user email and explicitly select password to compare
-    const user = await User.findOne({ email }).select('+password');
+    if (normalizedEmail === demoEmail.toLowerCase() && password === demoPassword) {
+      let user = await User.findOne({ email: demoEmail }).select('+password');
 
-    if (user && (await user.matchPassword(password))) {
-      res.json({
+      if (!user) {
+        user = await User.create({
+          name: 'Demo User',
+          email: demoEmail,
+          password: demoPassword,
+        });
+      }
+
+      return res.json({
         _id: user._id,
         name: user.name,
         email: user.email,
@@ -67,10 +79,31 @@ export const loginUser = async (req, res, next) => {
         role: user.role,
         token: generateToken(user._id, user.email, user.role),
       });
-    } else {
-      res.status(401);
-      throw new Error('Invalid email or password');
     }
+
+    // Check for user email and explicitly select password to compare
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+
+    console.log('[Auth] Login attempt:', { email: normalizedEmail, userFound: !!user });
+    
+    if (user) {
+      const isPasswordMatch = await user.matchPassword(password);
+      console.log('[Auth] Password match:', isPasswordMatch);
+      
+      if (isPasswordMatch) {
+        return res.json({
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          avatar: user.avatar,
+          role: user.role,
+          token: generateToken(user._id, user.email, user.role),
+        });
+      }
+    }
+    
+    res.status(401);
+    throw new Error('Invalid email or password');
   } catch (error) {
     next(error);
   }

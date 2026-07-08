@@ -37,3 +37,78 @@ export const generateChatResponse = async (prompt, history = []) => {
     throw new Error('Failed to generate response from AI Service.');
   }
 };
+
+/**
+ * Generates a multiple-choice quiz for a roadmap phase using Gemini.
+ */
+export const generateRoadmapQuiz = async (topic, phaseTitle, phaseDescription) => {
+  try {
+    const aiClient = getGeminiClient();
+    const model = aiClient.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const prompt = `
+      You are an expert programming instructor. Generate a 5-question multiple choice quiz for a student learning about:
+      Topic: ${topic}
+      Phase: ${phaseTitle}
+      Description: ${phaseDescription}
+
+      Return ONLY a JSON array of objects with this exact structure, no markdown wrappers, no other text:
+      [
+        {
+          "question": "The question text",
+          "options": ["A", "B", "C", "D"],
+          "correctAnswerIndex": 0,
+          "explanation": "Why this is correct"
+        }
+      ]
+    `;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: 'application/json' }
+    });
+
+    return JSON.parse((await result.response).text());
+  } catch (error) {
+    console.error('[AI Service] Error generating quiz:', error);
+    throw new Error('Failed to generate quiz from AI Service.');
+  }
+};
+
+/**
+ * Generates learning resources for a roadmap phase using Gemini.
+ */
+export const generateRoadmapResources = async (topic, phaseTitle, phaseDescription) => {
+  try {
+    const aiClient = getGeminiClient();
+    const model = aiClient.getGenerativeModel({ model: 'gemini-1.5-flash' });
+
+    const prompt = `
+      You are an expert programming instructor. Recommend learning resources for a student learning about:
+      Topic: ${topic}
+      Phase: ${phaseTitle}
+      Description: ${phaseDescription}
+
+      Provide exactly 3 documentation/article links and 2 video search terms or links.
+      Return ONLY a JSON array of objects with this exact structure, no markdown wrappers:
+      [
+        {
+          "title": "Resource title",
+          "type": "article" | "video" | "documentation",
+          "url": "https://...",
+          "description": "Short description of what this covers"
+        }
+      ]
+    `;
+
+    const result = await model.generateContent({
+      contents: [{ role: 'user', parts: [{ text: prompt }] }],
+      generationConfig: { responseMimeType: 'application/json' }
+    });
+
+    return JSON.parse((await result.response).text());
+  } catch (error) {
+    console.error('[AI Service] Error generating resources:', error);
+    throw new Error('Failed to generate resources from AI Service.');
+  }
+};

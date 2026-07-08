@@ -9,6 +9,8 @@ import AIChat from '../pages/AIChat';
 import Challenges from '../pages/Challenges';
 import Roadmaps from '../pages/Roadmaps';
 import ResumeAnalyzer from '../pages/ResumeAnalyzer';
+import RoadmapQuiz from '../pages/RoadmapQuiz';
+import RoadmapResources from '../pages/RoadmapResources';
 import InterviewPrep from '../pages/InterviewPrep';
 import LeetCodeRecommendations from '../pages/LeetCodeRecommendations';
 import Profile from '../pages/Profile';
@@ -58,6 +60,14 @@ export const router = createBrowserRouter([
               {
                 path: '/roadmaps',
                 element: <Roadmaps />,
+              },
+              {
+                path: '/roadmaps/quiz',
+                element: <RoadmapQuiz />,
+              },
+              {
+                path: '/roadmaps/resources',
+                element: <RoadmapResources />,
               },
               {
                 path: '/resume-analyzer',

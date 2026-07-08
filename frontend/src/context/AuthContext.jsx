@@ -52,10 +52,11 @@ export const AuthProvider = ({ children }) => {
     try {
       const data = await authService.register({ name, email, password });
       setUser(data);
-      return true;
+      return { success: true };
     } catch (err) {
-      setError(err.message || 'Registration failed');
-      return false;
+      const message = err.message || 'Registration failed';
+      setError(message);
+      return { success: false, message };
     } finally {
       setLoading(false);
     }

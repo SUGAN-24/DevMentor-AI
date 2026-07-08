@@ -74,7 +74,10 @@ export default function Login() {
         </button>
       </form>
 
-      <div className="text-center mt-4">
+      <div className="text-center mt-4 space-y-2">
+        <p className="text-sm text-slate-400">
+          Demo account: <span className="text-slate-200">demo@devmentor.ai</span> / <span className="text-slate-200">demo12345</span>
+        </p>
         <p className="text-sm text-slate-400">
           Don't have an account?{' '}
           <Link to="/register" className="text-indigo-400 hover:text-indigo-300 transition-colors">

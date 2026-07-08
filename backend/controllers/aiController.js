@@ -97,3 +97,57 @@ export const analyzeResume = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * @desc    Generate a quiz for a roadmap phase
+ * @route   POST /api/ai/quiz
+ * @access  Public (Protected via auth in routes)
+ */
+export const getRoadmapQuiz = async (req, res, next) => {
+  try {
+    const { topic, phaseTitle, phaseDescription } = req.body;
+    if (!topic || !phaseTitle) {
+      res.status(400);
+      throw new Error('Please provide topic and phaseTitle.');
+    }
+
+    // Dynamic import to avoid circular dependencies if any, but since we are in controller we can just import at top.
+    // Wait, let's just import it at the top of the file in another chunk.
+    const { generateRoadmapQuiz } = await import('../services/aiService.js');
+    
+    const quiz = await generateRoadmapQuiz(topic, phaseTitle, phaseDescription);
+    
+    res.status(200).json({
+      success: true,
+      data: quiz
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * @desc    Generate resources for a roadmap phase
+ * @route   POST /api/ai/resources
+ * @access  Public (Protected via auth in routes)
+ */
+export const getRoadmapResources = async (req, res, next) => {
+  try {
+    const { topic, phaseTitle, phaseDescription } = req.body;
+    if (!topic || !phaseTitle) {
+      res.status(400);
+      throw new Error('Please provide topic and phaseTitle.');
+    }
+
+    const { generateRoadmapResources } = await import('../services/aiService.js');
+    
+    const resources = await generateRoadmapResources(topic, phaseTitle, phaseDescription);
+    
+    res.status(200).json({
+      success: true,
+      data: resources
+    });
+  } catch (error) {
+    next(error);
+  }
+};

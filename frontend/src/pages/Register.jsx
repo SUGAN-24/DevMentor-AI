@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Register() {
-  const { register, loading } = useAuth();
+  const { register, loading, error: authError } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,14 +19,14 @@ export default function Register() {
     }
 
     try {
-      const success = await register(name, email, password);
-      if (success) {
+      const result = await register(name, email, password);
+      if (result.success) {
         navigate('/');
       } else {
-        setError('Registration failed. Email might already exist.');
+        setError(result.message || authError || 'Registration failed. Please try again.');
       }
     } catch (err) {
-      setError('Registration failed');
+      setError(err.message || 'Registration failed');
     }
   };
 
