@@ -1,4 +1,5 @@
-# DevMentor AI
+# DevMentor-AI
+AI-powered coding mentor for project-based learning, debugging, and interview preparation.
 
 A scalable, production-ready, and well-organized full-stack JavaScript application framework.
 
@@ -6,8 +7,8 @@ A scalable, production-ready, and well-organized full-stack JavaScript applicati
 
 This project is set up as an npm monorepo workspace:
 
-- `client/`: React + Vite frontend application.
-- `server/`: Node.js + Express backend service.
+- `frontend/`: React + Vite frontend application.
+- `backend/`: Node.js + Express backend service.
 
 ## Getting Started
 
@@ -24,7 +25,7 @@ From the root directory, run:
 npm install
 ```
 
-This will automatically install dependencies for both the frontend (`client`) and backend (`server`) workspaces.
+This will automatically install dependencies for both the frontend and backend workspaces.
 
 ### Development
 
