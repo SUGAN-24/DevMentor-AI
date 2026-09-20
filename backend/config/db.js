@@ -16,19 +16,15 @@ export const connectDB = async () => {
       console.log(`[Database] MongoDB Connected: ${conn.connection.host}`);
       return;
     } catch (err) {
-      if (config.nodeEnv === 'development') {
-        console.warn(`[Database] Error connecting to MongoDB: ${err.message}. Falling back to memory server...`);
-        mongoServer = await MongoMemoryServer.create({ 
-          binary: { version: '6.0.14' },
-          instance: { launchTimeout: 60000 }
-        });
-        const uri = mongoServer.getUri();
-        await mongoose.disconnect();
-        const conn = await mongoose.connect(uri, options);
-        console.log(`[Database] MongoDB Memory Server Connected: ${conn.connection.host}`);
-      } else {
-        throw err;
-      }
+      console.warn(`[Database] Error connecting to MongoDB: ${err.message}. Falling back to memory server...`);
+      mongoServer = await MongoMemoryServer.create({ 
+        binary: { version: '6.0.14' },
+        instance: { launchTimeout: 60000 }
+      });
+      const uri = mongoServer.getUri();
+      await mongoose.disconnect();
+      const conn = await mongoose.connect(uri, options);
+      console.log(`[Database] MongoDB Memory Server Connected: ${conn.connection.host}`);
     }
   } catch (error) {
     console.error(`[Database] Error connecting to MongoDB: ${error.message}`);
