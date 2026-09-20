@@ -4,41 +4,43 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 lerna-debug.log*
 
-# Diagnostic reports
-report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Coverage directory used by tools like istanbul
+coverage
+*.lcov
+
+# nyc test coverage
+.nyc_output
 
 # Dependency directories
 node_modules/
 jspm_packages/
 
-# TypeScript v1 declaration files
-typings/
+# TypeScript cache
+.tsbuildinfo
 
 # Optional npm cache directory
 .npm
 
-# Output directory for Vite builds
-dist/
-dist-ssr/
+# Optional eslint cache
+.eslintcache
 
-# Environment files
+# dotenv environment variables file
 .env
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
-*.local
+.env.test
+.env.production
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea/
+# Mac OS X hidden files
 .DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+
+# Vite / React build output
+frontend/dist
+backend/node_modules
+frontend/node_modules

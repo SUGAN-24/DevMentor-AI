@@ -9,18 +9,23 @@ export const generateChatResponse = async (prompt, history = []) => {
   try {
     const aiClient = getGeminiClient();
     
-    // We use gemini-1.5-flash for fast chat responses
+    // We use gemini-flash-lite-latest for fast chat responses
     const model = aiClient.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-flash-lite-latest',
       systemInstruction: 'You are an expert programming mentor named DevMentor AI. Your goal is to help users learn programming, fix bugs, and understand complex system designs. Keep answers concise, and use markdown code blocks for code snippets.'
     });
 
     // Formatting history for GoogleGenerativeAI SDK
     // The SDK expects history format: { role: 'user' | 'model', parts: [{ text: string }] }
-    const formattedHistory = history.map(msg => ({
+    let formattedHistory = history.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'model',
       parts: [{ text: msg.text }]
     }));
+
+    // Gemini API requires the first message in history to be from the 'user'
+    while (formattedHistory.length > 0 && formattedHistory[0].role !== 'user') {
+      formattedHistory.shift();
+    }
 
     const chat = model.startChat({
       history: formattedHistory,
@@ -44,7 +49,7 @@ export const generateChatResponse = async (prompt, history = []) => {
 export const generateRoadmapQuiz = async (topic, phaseTitle, phaseDescription) => {
   try {
     const aiClient = getGeminiClient();
-    const model = aiClient.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = aiClient.getGenerativeModel({ model: 'gemini-flash-lite-latest' });
 
     const prompt = `
       You are an expert programming instructor. Generate a 5-question multiple choice quiz for a student learning about:
@@ -81,7 +86,7 @@ export const generateRoadmapQuiz = async (topic, phaseTitle, phaseDescription) =
 export const generateRoadmapResources = async (topic, phaseTitle, phaseDescription) => {
   try {
     const aiClient = getGeminiClient();
-    const model = aiClient.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = aiClient.getGenerativeModel({ model: 'gemini-flash-lite-latest' });
 
     const prompt = `
       You are an expert programming instructor. Recommend learning resources for a student learning about:

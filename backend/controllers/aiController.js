@@ -44,7 +44,7 @@ export const analyzeResume = async (req, res, next) => {
     }
 
     const aiClient = getGeminiClient();
-    const model = aiClient.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = aiClient.getGenerativeModel({ model: 'gemini-flash-lite-latest' });
 
     const prompt = `
       Analyze the provided software engineering/developer resume.

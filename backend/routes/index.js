@@ -5,6 +5,8 @@ import authRoutes from './authRoutes.js';
 import challengeRoutes from './challengeRoutes.js';
 import roadmapRoutes from './roadmapRoutes.js';
 import resumeRoutes from './resumeRoutes.js';
+import interviewRoutes from './interviewRoutes.js';
+import leetCodeRoutes from './leetCodeRoutes.js';
 
 const router = express.Router();
 
@@ -14,6 +16,8 @@ router.use('/auth', authRoutes);
 router.use('/challenges', challengeRoutes);
 router.use('/roadmaps', roadmapRoutes);
 router.use('/resumes', resumeRoutes);
+router.use('/interviews', interviewRoutes);
+router.use('/leetcode', leetCodeRoutes);
 
 /**
  * @route   GET /api/health

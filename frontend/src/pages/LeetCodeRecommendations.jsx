@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getLeetCodeProblems } from '../services/leetCodeService';
 
 const TOPICS = [
   'All',
@@ -12,28 +13,27 @@ const TOPICS = [
 
 const DIFFICULTIES = ['All', 'Easy', 'Medium', 'Hard'];
 
-const MOCK_PROBLEMS = [
-  { id: 1, title: 'Two Sum', topic: 'Arrays', difficulty: 'Easy', link: 'https://leetcode.com/problems/two-sum/' },
-  { id: 2, title: 'Best Time to Buy and Sell Stock', topic: 'Arrays', difficulty: 'Easy', link: 'https://leetcode.com/problems/best-time-to-buy-and-sell-stock/' },
-  { id: 3, title: 'Longest Substring Without Repeating Characters', topic: 'Strings', difficulty: 'Medium', link: 'https://leetcode.com/problems/longest-substring-without-repeating-characters/' },
-  { id: 4, title: 'Valid Anagram', topic: 'Strings', difficulty: 'Easy', link: 'https://leetcode.com/problems/valid-anagram/' },
-  { id: 5, title: 'Invert Binary Tree', topic: 'Trees', difficulty: 'Easy', link: 'https://leetcode.com/problems/invert-binary-tree/' },
-  { id: 6, title: 'Binary Tree Maximum Path Sum', topic: 'Trees', difficulty: 'Hard', link: 'https://leetcode.com/problems/binary-tree-maximum-path-sum/' },
-  { id: 7, title: 'Clone Graph', topic: 'Graphs', difficulty: 'Medium', link: 'https://leetcode.com/problems/clone-graph/' },
-  { id: 8, title: 'Course Schedule', topic: 'Graphs', difficulty: 'Medium', link: 'https://leetcode.com/problems/course-schedule/' },
-  { id: 9, title: 'Climbing Stairs', topic: 'Dynamic Programming', difficulty: 'Easy', link: 'https://leetcode.com/problems/climbing-stairs/' },
-  { id: 10, title: 'Longest Increasing Subsequence', topic: 'Dynamic Programming', difficulty: 'Medium', link: 'https://leetcode.com/problems/longest-increasing-subsequence/' },
-  { id: 11, title: 'Edit Distance', topic: 'Dynamic Programming', difficulty: 'Hard', link: 'https://leetcode.com/problems/edit-distance/' },
-  { id: 12, title: 'Binary Search', topic: 'Binary Search', difficulty: 'Easy', link: 'https://leetcode.com/problems/binary-search/' },
-  { id: 13, title: 'Search in Rotated Sorted Array', topic: 'Binary Search', difficulty: 'Medium', link: 'https://leetcode.com/problems/search-in-rotated-sorted-array/' },
-  { id: 14, title: 'Median of Two Sorted Arrays', topic: 'Binary Search', difficulty: 'Hard', link: 'https://leetcode.com/problems/median-of-two-sorted-arrays/' }
-];
-
 export default function LeetCodeRecommendations() {
+  const [problems, setProblems] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedTopic, setSelectedTopic] = useState('All');
   const [selectedDifficulty, setSelectedDifficulty] = useState('All');
 
-  const filteredProblems = MOCK_PROBLEMS.filter(problem => {
+  useEffect(() => {
+    const fetchProblems = async () => {
+      try {
+        const data = await getLeetCodeProblems();
+        setProblems(data);
+      } catch (error) {
+        console.error('Failed to fetch leetcode problems', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProblems();
+  }, []);
+
+  const filteredProblems = problems.filter(problem => {
     const topicMatch = selectedTopic === 'All' || problem.topic === selectedTopic;
     const difficultyMatch = selectedDifficulty === 'All' || problem.difficulty === selectedDifficulty;
     return topicMatch && difficultyMatch;

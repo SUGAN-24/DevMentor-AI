@@ -1,15 +1,35 @@
 import mongoose from 'mongoose';
 import { config } from './index.js';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+
+let mongoServer;
 
 export const connectDB = async () => {
   try {
     const options = {
       // Give Atlas more time to respond in case of DNS/network delays
-      serverSelectionTimeoutMS: 30000,
+      serverSelectionTimeoutMS: 3000,
     };
 
-    const conn = await mongoose.connect(config.mongodbUri, options);
-    console.log(`[Database] MongoDB Connected: ${conn.connection.host}`);
+    try {
+      const conn = await mongoose.connect(config.mongodbUri, options);
+      console.log(`[Database] MongoDB Connected: ${conn.connection.host}`);
+      return;
+    } catch (err) {
+      if (config.nodeEnv === 'development') {
+        console.warn(`[Database] Error connecting to MongoDB: ${err.message}. Falling back to memory server...`);
+        mongoServer = await MongoMemoryServer.create({ 
+          binary: { version: '6.0.14' },
+          instance: { launchTimeout: 60000 }
+        });
+        const uri = mongoServer.getUri();
+        await mongoose.disconnect();
+        const conn = await mongoose.connect(uri, options);
+        console.log(`[Database] MongoDB Memory Server Connected: ${conn.connection.host}`);
+      } else {
+        throw err;
+      }
+    }
   } catch (error) {
     console.error(`[Database] Error connecting to MongoDB: ${error.message}`);
     // Print additional details for network-related errors

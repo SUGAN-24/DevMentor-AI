@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Bot, 
@@ -12,7 +12,10 @@ import {
 
 export default function RootLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [hasNotification, setHasNotification] = useState(true);
   const location = useLocation();
+  const navigate = useNavigate();
 
   const navigation = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -23,6 +26,14 @@ export default function RootLayout() {
     { name: 'Interview Prep', href: '/interview-prep', icon: GraduationCap },
     { name: 'LeetCode Prep', href: '/leetcode-recommendations', icon: TerminalSquare },
   ];
+
+  const handleNewSession = () => {
+    navigate('/chat');
+    // Dispatch a custom event so AIChat can clear its history
+    setTimeout(() => {
+      window.dispatchEvent(new Event('clear-chat-history'));
+    }, 100);
+  };
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex overflow-hidden selection:bg-indigo-500/30">
@@ -61,6 +72,7 @@ export default function RootLayout() {
               <Link
                 key={item.name}
                 to={item.href}
+                onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
                   isActive 
                     ? 'bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-inner'
@@ -108,26 +120,46 @@ export default function RootLayout() {
             </button>
             
             {/* Search Bar */}
-            <div className="hidden md:flex items-center relative">
-              <svg className="w-5 h-5 absolute left-3 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="hidden md:flex items-center relative group">
+              <svg className="w-5 h-5 absolute left-3 text-slate-500 group-focus-within:text-indigo-400 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <input 
                 type="text" 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search mentors, topics..." 
-                className="w-80 bg-slate-900/50 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-full py-2.5 pl-10 pr-4 text-sm text-slate-200 placeholder-slate-500 outline-none transition-all duration-300"
+                className="w-80 bg-slate-900/50 border border-slate-800 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 rounded-full py-2.5 pl-10 pr-10 text-sm text-slate-200 placeholder-slate-500 outline-none transition-all duration-300"
               />
+              {searchQuery && (
+                <button 
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-3 text-slate-400 hover:text-white transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
             </div>
           </div>
 
           <div className="flex items-center gap-4">
-            <button className="relative p-2.5 rounded-full bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-all duration-300 group">
+            <button 
+              onClick={() => setHasNotification(false)}
+              className="relative p-2.5 rounded-full bg-slate-900/50 border border-slate-800 text-slate-400 hover:text-indigo-400 hover:border-indigo-500/50 transition-all duration-300 group"
+            >
               <svg className="w-5 h-5 group-hover:animate-wiggle" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
-              <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-slate-900"></span>
+              {hasNotification && (
+                <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-slate-900"></span>
+              )}
             </button>
-            <button className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/25 transition-all duration-300 flex items-center gap-2">
+            <button 
+              onClick={handleNewSession}
+              className="px-4 py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-sm font-semibold rounded-xl shadow-lg shadow-indigo-500/25 transition-all duration-300 flex items-center gap-2"
+            >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
               </svg>
@@ -145,3 +177,4 @@ export default function RootLayout() {
     </div>
   );
 }
+

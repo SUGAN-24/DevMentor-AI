@@ -1,12 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 export default function Dashboard() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+
   const progressStats = [
-    { label: 'Total Sessions', value: '24', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', color: 'from-blue-500 to-cyan-500', bg: 'bg-blue-500/10' },
-    { label: 'Hours Learned', value: '142', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', color: 'from-violet-500 to-purple-500', bg: 'bg-violet-500/10' },
-    { label: 'Current Streak', value: '8 Days', icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'from-emerald-400 to-teal-500', bg: 'bg-emerald-500/10' },
+    { label: 'Total Sessions', value: user?.progress || '0', icon: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253', color: 'from-blue-500 to-cyan-500', bg: 'bg-blue-500/10' },
+    { label: 'Problems Solved', value: user?.problemsSolved || '0', icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z', color: 'from-violet-500 to-purple-500', bg: 'bg-violet-500/10' },
+    { label: 'Current Streak', value: `${user?.learningStreak || 0} Days`, icon: 'M13 10V3L4 14h7v7l9-11h-7z', color: 'from-emerald-400 to-teal-500', bg: 'bg-emerald-500/10' },
   ];
 
+  // We can fetch real recent activity if a model existed, but we'll leave it as a static showcase for now
+  // or hide it if we don't have real data. We'll leave it as placeholder since there's no backend for it.
   const recentActivity = [
     { id: 1, title: 'React Hooks Deep Dive', mentor: 'Sarah Jenkins', time: '2 hours ago', status: 'Completed' },
     { id: 2, title: 'System Design Interview Prep', mentor: 'David Chen', time: 'Yesterday', status: 'Reviewed' },
@@ -14,9 +21,9 @@ export default function Dashboard() {
   ];
 
   const quickActions = [
-    { title: 'Find a Mentor', desc: 'Browse experts in your field', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z' },
-    { title: 'Resume Review', desc: 'Get feedback on your CV', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-    { title: 'Mock Interview', desc: 'Practice with an AI agent', icon: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z' },
+    { title: 'Find a Roadmap', desc: 'Browse learning paths in your field', icon: 'M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z', route: '/roadmaps' },
+    { title: 'Resume Review', desc: 'Get feedback on your CV', icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', route: '/resume-analyzer' },
+    { title: 'Interview Prep', desc: 'Practice with an AI agent', icon: 'M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z', route: '/interview-prep' },
   ];
 
   return (
@@ -30,13 +37,15 @@ export default function Dashboard() {
         <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div className="space-y-4 max-w-2xl">
             <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white">
-              Welcome back, <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">Jane!</span>
+              Welcome back, <span className="bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">{user?.name ? user.name.split(' ')[0] : 'User'}!</span>
             </h1>
             <p className="text-slate-400 text-lg leading-relaxed">
-              You are on a <span className="text-white font-semibold">8-day streak</span>. Keep up the great work! Your next scheduled session is in 2 days.
+              You are on a <span className="text-white font-semibold">{user?.learningStreak || 0}-day streak</span>. Keep up the great work! Your next scheduled session is in 2 days.
             </p>
           </div>
-          <button className="whitespace-nowrap px-6 py-3 bg-white text-indigo-950 font-bold rounded-xl shadow-xl shadow-white/10 hover:shadow-white/20 hover:scale-105 transition-all duration-300">
+          <button 
+            onClick={() => navigate('/roadmaps')}
+            className="whitespace-nowrap px-6 py-3 bg-white text-indigo-950 font-bold rounded-xl shadow-xl shadow-white/10 hover:shadow-white/20 hover:scale-105 transition-all duration-300">
             View Learning Path
           </button>
         </div>
@@ -49,7 +58,7 @@ export default function Dashboard() {
         <div className="lg:col-span-2 space-y-8">
           <div className="flex items-center justify-between">
             <h2 className="text-xl font-bold text-white">Your Progress</h2>
-            <button className="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors">View detailed analytics &rarr;</button>
+            <button onClick={() => navigate('/profile')} className="text-sm font-medium text-indigo-400 hover:text-indigo-300 transition-colors">View detailed analytics &rarr;</button>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             {progressStats.map((stat, idx) => (
@@ -57,7 +66,6 @@ export default function Dashboard() {
                 <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-4 ${stat.bg}`}>
                   <svg className={`w-6 h-6 text-transparent bg-clip-text bg-gradient-to-br ${stat.color}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={stat.icon} />
-                    {/* Using a neat trick for gradient stroke by applying it to text and using currentColor, but standard stroke with solid color is more reliable in pure SVG. We'll stick to stroke="currentColor" and apply a text color to the SVG wrapper. */}
                   </svg>
                 </div>
                 <p className="text-sm font-medium text-slate-400 mb-1">{stat.label}</p>
@@ -101,7 +109,10 @@ export default function Dashboard() {
           <h2 className="text-xl font-bold text-white">Quick Actions</h2>
           <div className="space-y-4">
             {quickActions.map((action, idx) => (
-              <button key={idx} className="w-full text-left bg-slate-900/50 border border-slate-800 p-5 rounded-2xl hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all group flex items-start gap-4">
+              <button 
+                key={idx} 
+                onClick={() => navigate(action.route)}
+                className="w-full text-left bg-slate-900/50 border border-slate-800 p-5 rounded-2xl hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all group flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-slate-800 flex items-center justify-center shrink-0 group-hover:bg-indigo-500 group-hover:text-white transition-colors text-slate-400">
                   <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d={action.icon} />
@@ -125,7 +136,9 @@ export default function Dashboard() {
                 </div>
                 <h3 className="text-lg font-bold text-white">Ask DevMentor AI</h3>
                 <p className="text-sm text-slate-400">Stuck on a problem? Our AI agent is ready to help you debug and learn.</p>
-                <button className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-semibold text-slate-200 transition-colors mt-2">
+                <button 
+                  onClick={() => navigate('/chat')}
+                  className="w-full py-2.5 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg text-sm font-semibold text-slate-200 transition-colors mt-2">
                   Start Chat
                 </button>
               </div>

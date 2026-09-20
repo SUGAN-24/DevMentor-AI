@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { getInterviews } from '../services/interviewService';
 
 const CATEGORIES = [
   'Java', 'Python', 'React', 'Node.js', 
@@ -7,82 +8,29 @@ const CATEGORIES = [
 
 const QUESTION_TYPES = ['Technical', 'HR', 'Aptitude'];
 
-// Generate some mock questions to demonstrate the UI
-const MOCK_QUESTIONS = [
-  {
-    id: 1,
-    category: 'React',
-    type: 'Technical',
-    question: 'What is the virtual DOM in React, and how does it improve performance?',
-    answer: 'The Virtual DOM is an in-memory representation of the Real DOM. React compares the updated Virtual DOM with the pre-update version (diffing), determines exactly what changed, and then updates only those specific parts of the Real DOM (reconciliation). This minimizes expensive direct DOM manipulations, significantly boosting performance.'
-  },
-  {
-    id: 2,
-    category: 'React',
-    type: 'Technical',
-    question: 'Explain the difference between useEffect and useLayoutEffect.',
-    answer: '`useEffect` runs asynchronously AFTER the browser has painted the DOM. It is good for data fetching and most side effects. `useLayoutEffect` runs synchronously IMMEDIATELY after DOM mutations but before the browser paints. It should only be used when you need to read layout from the DOM and synchronously re-render to prevent flickering.'
-  },
-  {
-    id: 3,
-    category: 'Java',
-    type: 'Technical',
-    question: 'What is the difference between an Interface and an Abstract Class in Java?',
-    answer: 'An abstract class can have both abstract and concrete methods, and can contain instance variables. A class can extend only one abstract class. An interface (prior to Java 8) could only have abstract methods, but now supports default and static methods. A class can implement multiple interfaces.'
-  },
-  {
-    id: 4,
-    category: 'DBMS',
-    type: 'Technical',
-    question: 'Explain the concept of ACID properties in Database Management Systems.',
-    answer: 'ACID stands for Atomicity (all operations in a transaction succeed or none do), Consistency (database moves from one valid state to another), Isolation (concurrent transactions do not interfere with each other), and Durability (once committed, data is saved permanently even in crashes).'
-  },
-  {
-    id: 5,
-    category: 'Node.js',
-    type: 'Technical',
-    question: 'How does Node.js handle concurrency despite being single-threaded?',
-    answer: 'Node.js uses an event-driven, non-blocking I/O model. It has a single main thread that executes JavaScript code, but delegates heavy I/O operations (like file system access or network requests) to the internal C++ thread pool (libuv). When the I/O operation completes, a callback is pushed to the event queue, which the event loop eventually executes.'
-  },
-  // Generic HR Questions
-  {
-    id: 101,
-    category: 'React', // Showing HR under all to simplify, or mapped specific
-    type: 'HR',
-    question: 'Tell me about a time you had to learn a new technology (like React) under a tight deadline.',
-    answer: 'Focus on the STAR method: Situation (project needs), Task (learn React in 1 week), Action (took crash courses, read official docs, built small prototypes), Result (successfully delivered the feature on time and shared knowledge with the team).'
-  },
-  {
-    id: 102,
-    category: 'Java',
-    type: 'HR',
-    question: 'How do you handle disagreements with a senior developer regarding system architecture?',
-    answer: 'Emphasize communication and objective reasoning. Explain that you would ask questions to understand their perspective, present your own arguments backed by data or documentation, and ultimately support the team\'s final decision gracefully.'
-  },
-  // Aptitude
-  {
-    id: 201,
-    category: 'Operating Systems',
-    type: 'Aptitude',
-    question: 'If a computer processes 1,000 instructions per second, how many instructions does it process in 2.5 minutes?',
-    answer: '2.5 minutes = 150 seconds. 150 seconds * 1,000 instructions/second = 150,000 instructions.'
-  },
-  {
-    id: 202,
-    category: 'Python',
-    type: 'Aptitude',
-    question: 'Find the next number in the series: 2, 6, 12, 20, 30, ?',
-    answer: '42. The differences are 4, 6, 8, 10... so the next difference is 12. 30 + 12 = 42.'
-  }
-];
-
 export default function InterviewPrep() {
+  const [questions, setQuestions] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState('React');
   const [selectedType, setSelectedType] = useState('Technical');
   const [revealedAnswers, setRevealedAnswers] = useState(new Set());
 
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      try {
+        const data = await getInterviews();
+        setQuestions(data);
+      } catch (error) {
+        console.error('Failed to fetch interview questions', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchQuestions();
+  }, []);
+
   // Filter questions based on selections
-  const filteredQuestions = MOCK_QUESTIONS.filter(
+  const filteredQuestions = questions.filter(
     (q) => q.category === selectedCategory && q.type === selectedType
   );
 

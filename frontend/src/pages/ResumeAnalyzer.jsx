@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import api from '../services/api';
+import { analyzeResume as aiAnalyzeResume } from '../services/aiService';
+import { createResume } from '../services/resumeService';
 
 export default function ResumeAnalyzer() {
   const [file, setFile] = useState(null);
@@ -37,8 +38,23 @@ export default function ResumeAnalyzer() {
     try {
       const base64Data = await getBase64(file);
 
-      const response = await api.post('/ai/analyze-resume', { pdfBase64: base64Data });
-      setAnalysis(response.data.data);
+      // Call AI Service
+      const result = await aiAnalyzeResume(base64Data);
+      const aiData = result.data || result;
+      setAnalysis(aiData);
+
+      // Save to database
+      try {
+        await createResume({
+          title: file.name,
+          content: 'PDF content (Base64 omitted for space)',
+          analysisScore: aiData.atsScore,
+          feedback: [...(aiData.missingSkills || []), ...(aiData.improvements || [])]
+        });
+      } catch (saveErr) {
+        console.error('Failed to save resume to history:', saveErr);
+        // We don't fail the whole operation if just saving fails
+      }
     } catch (err) {
       console.error(err);
       setError(err.message || 'An error occurred during resume analysis. Please verify your backend server and Gemini API keys.');

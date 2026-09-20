@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import { getRoadmaps, createRoadmap } from '../services/roadmapService';
 
 const TOPICS = [
   'Java', 'Python', 'React', 'Node.js', 
@@ -9,27 +10,24 @@ const TOPICS = [
 
 const LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
-// Mock data generator for roadmaps
+// Mock data generator for roadmaps (used to seed DB on "Generate")
 const generateRoadmapData = (topic, level) => {
   const nodeCount = level === 'Beginner' ? 4 : level === 'Intermediate' ? 6 : 8;
   const nodes = [];
   
   for (let i = 1; i <= nodeCount; i++) {
     nodes.push({
-      id: i,
       title: `${topic} Phase ${i}: ${level} Concepts`,
-      description: `Master the core concepts of phase ${i}. This includes hands-on projects and theoretical foundations essential for ${level.toLowerCase()} ${topic} developers.`,
-      duration: `${i * 2} Weeks`
+      details: `Master the core concepts of phase ${i}. This includes hands-on projects and theoretical foundations essential for ${level.toLowerCase()} ${topic} developers.`
     });
   }
 
-  // Inject some specific mock data for a few known paths to make it look realistic
   if (topic === 'React' && level === 'Beginner') {
     return [
-      { id: 1, title: 'HTML, CSS & JS Fundamentals', description: 'Brush up on ES6+, DOM manipulation, flexbox, and grid.', duration: '2 Weeks' },
-      { id: 2, title: 'React Basics & JSX', description: 'Understand components, props, state, and the virtual DOM.', duration: '3 Weeks' },
-      { id: 3, title: 'Hooks & State Management', description: 'Learn useState, useEffect, useContext, and custom hooks.', duration: '3 Weeks' },
-      { id: 4, title: 'Routing & API Fetching', description: 'Implement React Router and fetch data from REST APIs.', duration: '2 Weeks' }
+      { title: 'HTML, CSS & JS Fundamentals', details: 'Brush up on ES6+, DOM manipulation, flexbox, and grid.' },
+      { title: 'React Basics & JSX', details: 'Understand components, props, state, and the virtual DOM.' },
+      { title: 'Hooks & State Management', details: 'Learn useState, useEffect, useContext, and custom hooks.' },
+      { title: 'Routing & API Fetching', details: 'Implement React Router and fetch data from REST APIs.' }
     ];
   }
 
@@ -37,18 +35,51 @@ const generateRoadmapData = (topic, level) => {
 };
 
 export default function Roadmaps() {
+  const [savedRoadmaps, setSavedRoadmaps] = useState([]);
   const [selectedTopic, setSelectedTopic] = useState('React');
   const [selectedLevel, setSelectedLevel] = useState('Beginner');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [roadmap, setRoadmap] = useState(generateRoadmapData('React', 'Beginner'));
+  
+  const [activeRoadmap, setActiveRoadmap] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  const handleGenerate = () => {
+  // Fetch all saved roadmaps on mount
+  useEffect(() => {
+    const fetchRoadmaps = async () => {
+      try {
+        const data = await getRoadmaps();
+        setSavedRoadmaps(data);
+        if (data.length > 0) {
+          setActiveRoadmap(data[0]);
+        }
+      } catch (error) {
+        console.error('Failed to fetch roadmaps', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRoadmaps();
+  }, []);
+
+  const handleGenerate = async () => {
     setIsGenerating(true);
-    // Simulate generation delay
-    setTimeout(() => {
-      setRoadmap(generateRoadmapData(selectedTopic, selectedLevel));
+    try {
+      // Create a roadmap object to save
+      const steps = generateRoadmapData(selectedTopic, selectedLevel);
+      const newRoadmapData = {
+        title: `${selectedLevel} ${selectedTopic} Path`,
+        description: `A generated roadmap for ${selectedLevel} level ${selectedTopic} developers.`,
+        steps
+      };
+      
+      const created = await createRoadmap(newRoadmapData);
+      setSavedRoadmaps([created, ...savedRoadmaps]);
+      setActiveRoadmap(created);
+    } catch (error) {
+      console.error('Failed to generate/save roadmap', error);
+    } finally {
       setIsGenerating(false);
-    }, 800);
+    }
   };
 
   return (
@@ -99,76 +130,92 @@ export default function Roadmaps() {
                 Generating...
               </>
             ) : (
-              'Generate Roadmap'
+              'Generate & Save Roadmap'
             )}
           </button>
         </div>
       </div>
 
-      {/* Roadmap Visualization */}
-      <div className="pt-8">
-        <div className="flex items-center gap-4 mb-8">
-          <h2 className="text-2xl font-bold text-white">
-            {selectedLevel} {selectedTopic} Path
-          </h2>
-          <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-wider rounded-full">
-            {roadmap.length} Milestones
-          </span>
+      {/* Your Saved Roadmaps */}
+      {savedRoadmaps.length > 0 && (
+        <div className="pt-4">
+          <h2 className="text-xl font-bold text-white mb-4">Your Saved Roadmaps</h2>
+          <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+            {savedRoadmaps.map((rm) => (
+              <button 
+                key={rm._id}
+                onClick={() => setActiveRoadmap(rm)}
+                className={`shrink-0 px-4 py-2 rounded-xl border transition-colors ${activeRoadmap?._id === rm._id ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300' : 'bg-slate-900 border-slate-700 text-slate-400 hover:bg-slate-800 hover:text-slate-200'}`}
+              >
+                {rm.title}
+              </button>
+            ))}
+          </div>
         </div>
+      )}
 
-        {/* Connected Cards Timeline */}
-        <div className="relative border-l-2 border-slate-800 ml-4 md:ml-6 space-y-12 pb-8">
-          {roadmap.map((node, index) => (
-            <div key={node.id} className="relative pl-8 md:pl-12">
-              {/* Timeline Dot */}
-              <div className="absolute left-[-9px] top-6 w-4 h-4 rounded-full bg-indigo-500 ring-4 ring-slate-950 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
-              
-              {/* Card */}
-              <div className="bg-slate-900/50 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-6 transition-all duration-300 hover:bg-slate-800/50 shadow-xl group">
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
-                  <div>
-                    <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 block">
-                      Phase {index + 1}
-                    </span>
-                    <h3 className="text-xl font-bold text-slate-100 group-hover:text-white transition-colors">
-                      {node.title}
-                    </h3>
-                  </div>
-                  <div className="shrink-0 bg-slate-950 border border-slate-700 px-3 py-1.5 rounded-lg flex items-center gap-2">
-                    <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <span className="text-sm font-medium text-slate-300">{node.duration}</span>
-                  </div>
-                </div>
-                <p className="text-slate-400 leading-relaxed">
-                  {node.description}
-                </p>
+      {loading && <p className="text-slate-400">Loading roadmaps...</p>}
+
+      {/* Roadmap Visualization */}
+      {activeRoadmap && (
+        <div className="pt-4">
+          <div className="flex items-center gap-4 mb-8">
+            <h2 className="text-2xl font-bold text-white">
+              {activeRoadmap.title}
+            </h2>
+            <span className="px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold uppercase tracking-wider rounded-full">
+              {activeRoadmap.steps?.length || 0} Milestones
+            </span>
+          </div>
+
+          {/* Connected Cards Timeline */}
+          <div className="relative border-l-2 border-slate-800 ml-4 md:ml-6 space-y-12 pb-8">
+            {activeRoadmap.steps?.map((node, index) => (
+              <div key={node._id || index} className="relative pl-8 md:pl-12">
+                {/* Timeline Dot */}
+                <div className="absolute left-[-9px] top-6 w-4 h-4 rounded-full bg-indigo-500 ring-4 ring-slate-950 shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
                 
-                <div className="mt-6 pt-6 border-t border-slate-800 flex items-center gap-4">
-                  <Link 
-                    to="/roadmaps/resources" 
-                    state={{ topic: selectedTopic, phaseTitle: node.title, phaseDescription: node.description }}
-                    className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
-                  >
-                    View Resources
-                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
-                  <Link 
-                    to="/roadmaps/quiz" 
-                    state={{ topic: selectedTopic, phaseTitle: node.title, phaseDescription: node.description }}
-                    className="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1"
-                  >
-                    Take Quiz
-                  </Link>
+                {/* Card */}
+                <div className="bg-slate-900/50 border border-slate-800 hover:border-indigo-500/40 rounded-2xl p-6 transition-all duration-300 hover:bg-slate-800/50 shadow-xl group">
+                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-4">
+                    <div>
+                      <span className="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-1 block">
+                        Phase {index + 1}
+                      </span>
+                      <h3 className="text-xl font-bold text-slate-100 group-hover:text-white transition-colors">
+                        {node.title}
+                      </h3>
+                    </div>
+                  </div>
+                  <p className="text-slate-400 leading-relaxed">
+                    {node.details}
+                  </p>
+                  
+                  <div className="mt-6 pt-6 border-t border-slate-800 flex items-center gap-4">
+                    <Link 
+                      to="/roadmaps/resources" 
+                      state={{ topic: selectedTopic, phaseTitle: node.title, phaseDescription: node.details }}
+                      className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 transition-colors flex items-center gap-1"
+                    >
+                      View Resources
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                      </svg>
+                    </Link>
+                    <Link 
+                      to="/roadmaps/quiz" 
+                      state={{ topic: selectedTopic, phaseTitle: node.title, phaseDescription: node.details }}
+                      className="text-sm font-semibold text-slate-400 hover:text-white transition-colors flex items-center gap-1"
+                    >
+                      Take Quiz
+                    </Link>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

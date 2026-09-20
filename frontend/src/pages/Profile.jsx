@@ -3,16 +3,22 @@ import React, { useState } from 'react';
 export default function Profile() {
   const [isEditing, setIsEditing] = useState(false);
   
-  // Mock Profile Data
-  const [profile, setProfile] = useState({
-    name: 'Jane Doe',
-    email: 'jane.doe@example.com',
-    avatar: 'https://ui-avatars.com/api/?name=Jane+Doe&background=6366f1&color=fff&size=128',
-    bio: 'Passionate full-stack developer learning advanced algorithms and React performance optimization techniques.',
-    skills: ['JavaScript', 'React', 'Node.js', 'MongoDB', 'Python', 'Java'],
-    problemsSolved: 142,
-    learningStreak: 12,
-    progress: 78 // percentage
+  // Load profile from localStorage or use default mock data
+  const [profile, setProfile] = useState(() => {
+    const saved = localStorage.getItem('devmentor_profile');
+    if (saved) {
+      return JSON.parse(saved);
+    }
+    return {
+      name: 'Jane Doe',
+      email: 'jane.doe@example.com',
+      avatar: 'https://ui-avatars.com/api/?name=Jane+Doe&background=6366f1&color=fff&size=128',
+      bio: 'Passionate full-stack developer learning advanced algorithms and React performance optimization techniques.',
+      skills: ['JavaScript', 'React', 'Node.js', 'MongoDB', 'Python', 'Java'],
+      problemsSolved: 142,
+      learningStreak: 12,
+      progress: 78 // percentage
+    };
   });
 
   // Edit State
@@ -21,6 +27,7 @@ export default function Profile() {
 
   const handleSave = () => {
     setProfile(editForm);
+    localStorage.setItem('devmentor_profile', JSON.stringify(editForm));
     setIsEditing(false);
   };
 
@@ -45,6 +52,13 @@ export default function Profile() {
         skills: [...prev.skills, newSkill.trim()]
       }));
       setNewSkill('');
+    }
+  };
+
+  const handleAvatarClick = () => {
+    const newUrl = prompt('Enter new avatar URL:');
+    if (newUrl) {
+      setEditForm(prev => ({ ...prev, avatar: newUrl }));
     }
   };
 
@@ -84,7 +98,10 @@ export default function Profile() {
                 className="w-32 h-32 rounded-full border-4 border-slate-900 shadow-xl object-cover relative z-10"
               />
               {isEditing && (
-                <button className="absolute bottom-0 right-0 z-20 w-8 h-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center border-2 border-slate-900 shadow-md transition-colors">
+                <button 
+                  onClick={handleAvatarClick}
+                  className="absolute bottom-0 right-0 z-20 w-8 h-8 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full flex items-center justify-center border-2 border-slate-900 shadow-md transition-colors"
+                >
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />

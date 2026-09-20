@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import { getChallenges } from '../services/challengeService';
 
 export default function Challenges() {
   const [challenges, setChallenges] = useState([]);
@@ -12,8 +12,8 @@ export default function Challenges() {
     const fetchChallenges = async () => {
       try {
         setLoading(true);
-        const response = await axios.get('/api/challenges');
-        setChallenges(response.data);
+        const data = await getChallenges();
+        setChallenges(data);
         setError(null);
       } catch (err) {
         console.error('Error fetching challenges:', err);

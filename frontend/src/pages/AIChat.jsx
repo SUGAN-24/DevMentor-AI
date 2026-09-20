@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import api from '../services/api';
+import { sendChatMessage } from '../services/aiService';
 
 // A simple utility to render markdown code blocks to basic HTML for our chat
 const parseMessage = (text) => {
@@ -42,6 +42,16 @@ export default function AIChat() {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  useEffect(() => {
+    const handleClearHistory = () => {
+      setMessages([
+        { role: 'model', text: 'Hello! I am DevMentor AI. How can I help you with your code today?' }
+      ]);
+    };
+    window.addEventListener('clear-chat-history', handleClearHistory);
+    return () => window.removeEventListener('clear-chat-history', handleClearHistory);
+  }, []);
+
   const handleSend = async (e) => {
     e?.preventDefault();
     if (!input.trim() || isLoading) return;
@@ -53,12 +63,8 @@ export default function AIChat() {
     setIsLoading(true);
 
     try {
-      const response = await api.post('/ai/chat', { 
-        prompt: userMessage,
-        history: messages 
-      });
-
-      setMessages(prev => [...prev, { role: 'model', text: response.data.data.text }]);
+      const response = await sendChatMessage(userMessage, messages);
+      setMessages(prev => [...prev, { role: 'model', text: response.data?.text || response.text }]);
     } catch (err) {
       console.error(err);
       setError(err.message || 'An error occurred while connecting to DevMentor AI.');
