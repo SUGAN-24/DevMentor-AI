@@ -1,5 +1,26 @@
 @import "tailwindcss";
 
+@theme {
+  --color-slate-100: var(--color-stone-100);
+  --color-slate-200: var(--color-stone-200);
+  --color-slate-300: var(--color-stone-300);
+  --color-slate-400: var(--color-stone-400);
+  --color-slate-500: var(--color-stone-500);
+  --color-slate-600: var(--color-stone-600);
+  --color-slate-700: var(--color-stone-700);
+  --color-slate-800: var(--color-stone-800);
+  --color-slate-900: var(--color-stone-900);
+  --color-slate-950: var(--color-stone-950);
+  
+  --color-indigo-300: var(--color-amber-300);
+  --color-indigo-400: var(--color-amber-400);
+  --color-indigo-500: var(--color-amber-500);
+  --color-indigo-600: var(--color-amber-600);
+  
+  --color-violet-500: var(--color-orange-500);
+  --color-violet-600: var(--color-orange-600);
+}
+
 /* Base/Custom layer extensions can go here if needed */
 :root {
   --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -7,6 +28,6 @@
 
 body {
   font-family: var(--font-sans);
-  background-color: #f9fafb;
-  color: #111827;
+  background-color: #f5f5f4; /* warm stone-100 */
+  color: #1c1917; /* warm stone-900 */
 }
